@@ -21,7 +21,7 @@ def execute_jira_extraction(description: str):
         with open("prompts.yaml", "r") as f:
             config = yaml.safe_load(f)
         
-        system_instruction = config["v3"]["main_prompt"]
+        system_instruction = config["main_prompt"]
         logger.info("Configuration and prompts loaded.")
     except Exception as e:
         logger.error(f"Failed to load configuration: {e}")
