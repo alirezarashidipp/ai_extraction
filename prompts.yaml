@@ -36,4 +36,9 @@ field_instructions:
     
   overal_feedback: "Critical assessment of structural completeness and alignment with Agile story-writing principles (max 100 words)."
   
-  grooming_questions: "Generate exactly 4 technical blocker questions (data types, API contracts, edge cases). Return [] if 'what' is false."
+  grooming_questions: |
+    - Condition A: If what.identified is true, generate exactly 4 technical blocker questions.
+    - Condition B: If what.identified is false, return an empty list [] immediately.
+    
+    Questions must target missing implementation details (data types, API contracts, constraints).
+    Strictly avoid generic or placeholder questions. Zero tolerance for hallucinating questions for vague inputs.
