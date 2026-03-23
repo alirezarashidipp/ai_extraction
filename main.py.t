@@ -4,7 +4,7 @@ import sys
 from llm_client import StructuredLLMClient
 from schemas import JiraAnalysis
 
-# Standard production logging configuration
+# Production-grade logging configuration
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -14,40 +14,41 @@ logger = logging.getLogger(__name__)
 
 def execute_jira_extraction(description: str):
     """
-    Executes the extraction pipeline with local logic for agile_standard 
-    and org_text to ensure 100% accuracy and zero extra token cost.
+    Executes extraction with local logic injection.
+    Configured for flat prompts.yaml structure (no v3 nesting).
     """
-    # 1. Load system prompt from YAML
+    # 1. Load system prompt from flat YAML structure
     try:
         with open("prompts.yaml", "r") as f:
             config = yaml.safe_load(f)
         
-        # Accessing the main_prompt from the v3 or root level as defined in your yaml
-        system_instruction = config.get("v3", {}).get("main_prompt") or config.get("main_prompt")
-        logger.info("Configuration and prompts loaded.")
+        # Directly accessing the root key
+        system_instruction = config.get("main_prompt")
+        
+        if not system_instruction:
+            raise KeyError("'main_prompt' not found in the root of prompts.yaml")
+            
+        logger.info("System prompt loaded successfully.")
     except Exception as e:
-        logger.error(f"Failed to load configuration: {e}")
+        logger.error(f"Configuration Loading Failed: {e}")
         return None
 
-    # 2. Initialize the client
+    # 2. Initialize Client
     client = StructuredLLMClient()
 
-    logger.info("Requesting structured analysis from LLM...")
-
     try:
-        # 3. Perform LLM Query
-        # The LLM focuses only on extraction (Who, What, Why, AC, Reasoning, Questions)
+        # 3. LLM Query - Focused strictly on extraction
         analysis_result = client.query(
             system_prompt=system_instruction,
             user_prompt=description,
             response_model=JiraAnalysis
         )
 
-        # 4. Local Injection of org_text (Zero Token Cost)
+        # 4. Local Injection: org_text (Zero Token Cost)
         analysis_result.org_text = description
 
-        # 5. Local Calculation of agile_standard (Zero Token Cost & 100% Accuracy)
-        # Standard: Who, What, Why are identified AND Acceptance Criteria is present
+        # 5. Local Logic: agile_standard (100% Deterministic)
+        # Calculates based on the presence of Who, What, Why, and AC
         analysis_result.agile_standard = all([
             analysis_result.who.identified,
             analysis_result.what.identified,
@@ -55,22 +56,21 @@ def execute_jira_extraction(description: str):
             analysis_result.ac_defined.presence_ac
         ])
         
-        logger.info("Post-processing complete: Input reflected and Agile standard calculated locally.")
+        logger.info("Analysis and local post-processing completed.")
 
-        # 6. Output the result
+        # 6. Final Output
         print("\n" + "="*60)
-        print("PRODUCTION-READY JIRA ANALYSIS (OPTIMIZED)")
+        print("FINAL JIRA METADATA (LOCAL LOGIC APPLIED)")
         print("="*60)
         print(analysis_result.model_dump_json(indent=2))
         
         return analysis_result
 
     except Exception as e:
-        logger.error(f"Pipeline execution failed: {str(e)}")
+        logger.error(f"Pipeline Execution Failed: {str(e)}")
         return None
 
 if __name__ == "__main__":
-    # Test case representing a requirement
     test_input = (
         "As a Tfx team, we want to add a new column in the Project class, "
         "so that the application can store and manage additional data "
