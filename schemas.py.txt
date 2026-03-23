@@ -4,10 +4,14 @@ from enum import Enum
 
 class ActionCategory(str, Enum):
     MIGRATION = "migration"
+    DEBUG = "debug"
     ENHANCE = "enhance"
     REFACTOR = "refactor"
-    DEBUG = "debug"
+    TESTING = "testing"
+    DEPLOYMENT = "deployment"
+    RESEARCH = "research"
     OTHER = "other"
+    DOCUMENTATION = "documentation"
 
 class DetailLevel(str, Enum):
     WITH_DETAILS = "with_details"
@@ -15,36 +19,36 @@ class DetailLevel(str, Enum):
     NO_DETAILS = "no_details"
 
 class Who(BaseModel):
-    identified: bool
-    evidence: Optional[str]
+    identified: bool = Field(..., description="True if a specific role or team is mentioned.")
+    evidence: Optional[str] = Field(None, description="Verbatim quote of the requester.")
 
 class What(BaseModel):
-    identified: bool
-    category: ActionCategory
-    intent_evidence: str
-    the_level_of_details_in_intent: DetailLevel
+    identified: bool = Field(..., description="True if a technical action is stated.")
+    category: ActionCategory = Field(..., description="The primary technical category.")
+    intent_evidence: Optional[str] = Field(None, description="Verbatim quote of the technical intent.")
+    the_level_of_details_in_intent: DetailLevel = Field(..., description="Technical detail granularity.")
 
 class Why(BaseModel):
-    identified: bool
-    value_evidence: str
+    identified: bool = Field(..., description="True if business value is explicitly stated.")
+    value_evidence: Optional[str] = Field(None, description="Verbatim quote of the justification.")
 
 class CustomerImpact(BaseModel):
-    identified: bool
-    impact_evidence: Optional[str]
+    identified: bool = Field(..., description="True if end-user impact is mentioned.")
+    impact_evidence: Optional[str] = Field(None, description="Verbatim quote of the impact.")
 
 class AgilePrincipleCheck(BaseModel):
-    presence_ac: bool
-    ac_evidence: Optional[str]
-    english_text_feedback: str
-    overal_feedback: str
+    presence_ac: bool = Field(..., description="True if testable acceptance criteria exist.")
+    ac_evidence: Optional[str] = Field(None, description="Verbatim quote of the acceptance criteria.")
+    english_text_feedback: str = Field(..., description="Feedback on grammar and clarity.")
+    overal_feedback: str = Field(..., description="Feedback on structural completeness.")
 
 class JiraAnalysis(BaseModel):
-    reasoning: str
+    reasoning: str = Field(..., description="Internal logic for the classification.")
     who: Who
     what: What
     why: Why
     customer_impact: CustomerImpact
     ac_defined: AgilePrincipleCheck
-    grooming_questions: List[str]
-    agile_standard: bool
-    org_text: str
+    grooming_questions: List[str] = Field(..., description="Exactly 4 technical blocker questions.")
+    agile_standard: bool = Field(..., description="True if Who, What, Why and AC are all present.")
+    org_text: str = Field(..., description="Echo the original input text.")
