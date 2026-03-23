@@ -50,8 +50,7 @@ class JiraAnalysis(BaseModel):
     customer_impact: CustomerImpact
     ac_defined: AgilePrincipleCheck
     grooming_questions: List[str] = Field(..., description="Exactly 4 technical blocker questions.")
-    agile_standard: bool = Field(..., description="True if Who, What, Why and AC are all present.")
     
-    # Setting a default value prevents the LLM from being forced to generate this field,
-    # effectively saving completion tokens while allowing local injection.
-    org_text: str = Field(default="", description="Original input text (populated locally, not by LLM).")
+    # Defaults prevent LLM from generating these, saving tokens and allowing local population.
+    agile_standard: bool = Field(default=False, description="Calculated locally based on 3Ws and AC.")
+    org_text: str = Field(default="", description="Original input text populated locally.")
