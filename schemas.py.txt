@@ -19,38 +19,46 @@ class DetailLevel(str, Enum):
     NO_DETAILS = "no_details"
 
 class Who(BaseModel):
-    identified: bool = Field(..., description="True if a specific role or team is mentioned.")
+    identified: bool = Field(..., description="True if role/team is explicitly mentioned.")
     evidence: Optional[str] = Field(None, description="Verbatim quote of the requester.")
 
 class What(BaseModel):
-    identified: bool = Field(..., description="True if a technical action is stated.")
-    category: ActionCategory = Field(..., description="The primary technical category.")
-    intent_evidence: Optional[str] = Field(None, description="Verbatim quote of the technical intent.")
-    the_level_of_details_in_intent: DetailLevel = Field(..., description="Technical detail granularity.")
+    identified: bool = Field(..., description="True if technical action is stated.")
+    category: ActionCategory = Field(..., description="Primary technical category.")
+    intent_evidence: Optional[str] = Field(None, description="Verbatim quote of the intent.")
+    the_level_of_details_in_intent: DetailLevel = Field(..., description="Technical detail level.")
 
 class Why(BaseModel):
-    identified: bool = Field(..., description="True if business value is explicitly stated.")
-    value_evidence: Optional[str] = Field(None, description="Verbatim quote of the justification.")
+    identified: bool = Field(..., description="True if business value is stated.")
+    value_evidence: Optional[str] = Field(None, description="Verbatim quote of justification.")
 
 class CustomerImpact(BaseModel):
     identified: bool = Field(..., description="True if end-user impact is mentioned.")
-    impact_evidence: Optional[str] = Field(None, description="Verbatim quote of the impact.")
+    impact_evidence: Optional[str] = Field(None, description="Verbatim quote of impact.")
 
 class AgilePrincipleCheck(BaseModel):
-    presence_ac: bool = Field(..., description="True if testable acceptance criteria exist.")
-    ac_evidence: Optional[str] = Field(None, description="Verbatim quote of the extracted acceptance criteria.")
-    english_text_feedback: str = Field(..., description="Feedback on grammar and clarity.")
+    presence_ac: bool = Field(..., description="True if testable AC exists.")
+    ac_evidence: Optional[str] = Field(None, description="Verbatim AC extraction.")
+    
+    # Updated field with strict 3-part constraint
+    english_text_feedback: str = Field(
+        ..., 
+        description=(
+            "Strict 3-part feedback in max 10 words. Format: [Grammar] | [Length] | [Vocab/Typos]. "
+            "Example: 'Good grammar | Sentences long | Simple vocab, no typos.'"
+        )
+    )
     overal_feedback: str = Field(..., description="Feedback on structural completeness.")
 
 class JiraAnalysis(BaseModel):
-    reasoning: str = Field(..., description="Internal logic for the classification.")
+    reasoning: str = Field(..., description="Internal extraction logic.")
     who: Who
     what: What
     why: Why
     customer_impact: CustomerImpact
     ac_defined: AgilePrincipleCheck
-    grooming_questions: List[str] = Field(..., description="Exactly 4 technical blocker questions.")
+    grooming_questions: List[str] = Field(..., description="4 technical blocker questions.")
     
-    # Defaults prevent LLM from generating these, saving tokens and allowing local population.
-    agile_standard: bool = Field(default=False, description="Calculated locally based on 3Ws and AC.")
-    org_text: str = Field(default="", description="Original input text populated locally.")
+    # Local-only fields
+    agile_standard: bool = Field(default=False)
+    org_text: str = Field(default="")
