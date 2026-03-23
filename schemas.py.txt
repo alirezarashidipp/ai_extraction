@@ -38,7 +38,7 @@ class CustomerImpact(BaseModel):
 
 class AgilePrincipleCheck(BaseModel):
     presence_ac: bool = Field(..., description="True if testable acceptance criteria exist.")
-    ac_evidence: Optional[str] = Field(None, description="Verbatim quote of the acceptance criteria.")
+    ac_evidence: Optional[str] = Field(None, description="Verbatim quote of the extracted acceptance criteria.")
     english_text_feedback: str = Field(..., description="Feedback on grammar and clarity.")
     overal_feedback: str = Field(..., description="Feedback on structural completeness.")
 
@@ -51,4 +51,7 @@ class JiraAnalysis(BaseModel):
     ac_defined: AgilePrincipleCheck
     grooming_questions: List[str] = Field(..., description="Exactly 4 technical blocker questions.")
     agile_standard: bool = Field(..., description="True if Who, What, Why and AC are all present.")
-    org_text: str = Field(..., description="Echo the original input text.")
+    
+    # Setting a default value prevents the LLM from being forced to generate this field,
+    # effectively saving completion tokens while allowing local injection.
+    org_text: str = Field(default="", description="Original input text (populated locally, not by LLM).")
