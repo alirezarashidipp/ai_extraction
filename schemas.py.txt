@@ -1,0 +1,50 @@
+from typing import List, Optional
+from pydantic import BaseModel, Field
+from enum import Enum
+
+class ActionCategory(str, Enum):
+    MIGRATION = "migration"
+    ENHANCE = "enhance"
+    REFACTOR = "refactor"
+    DEBUG = "debug"
+    OTHER = "other"
+
+class DetailLevel(str, Enum):
+    WITH_DETAILS = "with_details"
+    MIDDLE = "middle"
+    NO_DETAILS = "no_details"
+
+class Who(BaseModel):
+    identified: bool
+    evidence: Optional[str]
+
+class What(BaseModel):
+    identified: bool
+    category: ActionCategory
+    intent_evidence: str
+    the_level_of_details_in_intent: DetailLevel
+
+class Why(BaseModel):
+    identified: bool
+    value_evidence: str
+
+class CustomerImpact(BaseModel):
+    identified: bool
+    impact_evidence: Optional[str]
+
+class AgilePrincipleCheck(BaseModel):
+    presence_ac: bool
+    ac_evidence: Optional[str]
+    english_text_feedback: str
+    overal_feedback: str
+
+class JiraAnalysis(BaseModel):
+    reasoning: str
+    who: Who
+    what: What
+    why: Why
+    customer_impact: CustomerImpact
+    ac_defined: AgilePrincipleCheck
+    grooming_questions: List[str]
+    agile_standard: bool
+    org_text: str
